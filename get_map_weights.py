@@ -22,11 +22,15 @@ def get_weights(map, w_size):
                     if not(type(pat_neigh) == float):
                         sig_act = (map.sigmas[i,j], map.sigmas[i + we, j + ns])
                         dist_act = get_dist(map.patterns[i, j], pat_neigh, sig_act, map.lam)
-                        w_act = math.exp(-(max(dist_act, 0) / map.lam**2))
-                        Z += w_act
+                        if not np.isnan(dist_act):
+                            w_act = math.exp(-(max(dist_act, 0) / map.lam**2))
+                            Z += w_act
+                        else:
+                            w_act = np.nan
                         weights[i, j, we + w_size, ns + w_size] = w_act
             weights[i, j] = weights[i, j] / Z
-            avg_wii += weights[i, j, w_size, w_size]
+            if not np.isnan(weights[i, j, w_size, w_size]):
+                avg_wii += weights[i, j, w_size, w_size]
     avg_wii /= map.w * map.h
     return weights, avg_wii
 
@@ -42,7 +46,10 @@ def get_dist(ref, neigh, sigmas, lam):
     """
     n_p = ref.shape[0]
     d = np.sum((ref - neigh) ** 2) - n_p * (sigmas[0] ** 2 + sigmas[1] ** 2)
-    d /= math.sqrt(2 * n_p) * (sigmas[0] ** 2 + sigmas[1] ** 2)
+    if not sigmas[0] ** 2 + sigmas[1] ** 2 == 0:
+        d /= math.sqrt(2 * n_p) * (sigmas[0] ** 2 + sigmas[1] ** 2)
+    else:
+        d = np.nan
     return d
 
 

@@ -5,12 +5,14 @@ from get_map_caract import get_lam_val, get_sigmas_val
 from get_map_weights import get_weights
 from denoise_map import denoise_map
 
-data_path = "C:/Users/Simon/Desktop/transfer_1767438_files_c64c2032/carto_EBSD_238000_238565/carto_EBSD_238000_238565"
-dimensions = (566, 1)
-k_dimensions = (336, 256)
-first_id = 238000
-map_1 = EBSDmap(data_path, dimensions, k_dimensions, first_id=first_id)
+#data_path = "C:/Users/Simon/Desktop/transfer_1767438_files_c64c2032/carto_EBSD_238000_238565/carto_EBSD_238000_238565"
+data_path = "Ni/EDAX-Ni.h5"
+dimensions = (186, 151)
+k_dimensions = (60, 60)
+first_id = 0
+pat_h5_path = 'Scan 1/EBSD/Data/Pattern'
 
+map_1 = EBSDmap(data_path, dimensions, k_dimensions, first_id=first_id, pat_h5_path=pat_h5_path)
 sigmas = get_sigmas_val(map_1)
 map_1.set_sigmas(sigmas)
 lam = get_lam_val(map_1)
