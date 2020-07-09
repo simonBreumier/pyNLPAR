@@ -1,7 +1,8 @@
 """Compute the EBSD map parameters lambda and sigma"""
 import numpy as np
-from get_map_weights import get_neig, get_weights
+from get_map_weights import get_neig, get_weights, local_to_global
 from scipy.optimize import least_squares
+from progress.bar import Bar
 
 
 def get_lam_val(map):
@@ -27,13 +28,15 @@ def lam_cost_fun(lam, map, target):
     weights, wii = get_weights(map, 1)
     return wii - target
 
+
 def get_sigmas_val(map):
     """Estimate the EBSDmap sigma value
 
     :param map: EBSDmap object
     """
     sigmas = np.zeros((map.w, map.h))
-    n_p = map.patterns[0, 0].shape[0]
+    n_p = map.patterns[map.pat_h5_path][0].shape[0]
+    bar = Bar('Compute sigma...', max=map.w*map.h)
     for i in range(0, map.w):
         for j in range(0, map.h):
             d_min = np.nan
@@ -41,9 +44,14 @@ def get_sigmas_val(map):
                 for ns in [-1, 0, 1]:
                     neig_act, same = get_neig(map, i, j, we, ns)
                     if not(same):
-                        d_actu = np.sum((map.patterns[i, j] - neig_act)**2)
+                        d_actu = np.sum((map.patterns[map.pat_h5_path][local_to_global(i, j, map.w)] - neig_act)**2)
                     else:
                         d_actu = np.nan
-                    d_min = np.nanmin([d_actu, d_min])
+                    if not(np.isnan(d_actu) and np.isnan(d_min)):
+                        d_min = np.nanmin([d_actu, d_min])
+                    else:
+                        d_min = np.nan
             sigmas[i, j] = np.sqrt(d_min / (2 * n_p))
+            bar.next()
+    bar.finish()
     return sigmas

@@ -21,10 +21,11 @@ def get_weights(map, w_size):
                     pat_neigh, same = get_neig(map, i, j, we, ns)
                     if not(type(pat_neigh) == float):
                         sig_act = (map.sigmas[i,j], map.sigmas[i + we, j + ns])
-                        dist_act = get_dist(map.patterns[i, j], pat_neigh, sig_act, map.lam)
+                        dist_act = get_dist(map.patterns[map.pat_h5_path][local_to_global(i, j, map.w)], pat_neigh, sig_act, map.lam)
                         if not np.isnan(dist_act):
-                            w_act = math.exp(-(max(dist_act, 0) / map.lam**2))
-                            Z += w_act
+                            w_act = math.exp(-(max(dist_act, 0) / (map.lam**2+1.e-3)))
+                            if not np.isnan(w_act):
+                                Z += w_act
                         else:
                             w_act = np.nan
                         weights[i, j, we + w_size, ns + w_size] = w_act
@@ -64,4 +65,8 @@ def get_neig(map, i, j, we, ns):
     if i + we < 0 or i + we >= map.w or j + ns < 0 or j + ns >= map.h:
         return np.nan, False
     else:
-        return map.patterns[i + we, j + ns], same
+        return map.patterns[map.pat_h5_path][local_to_global(i + we, j + ns, map.w)], same
+
+
+def local_to_global(i,j,w):
+    return j * w + i

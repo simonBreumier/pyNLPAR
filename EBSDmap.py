@@ -37,7 +37,7 @@ class EBSDmap:
         :param position: number position in the file name after split
         :param first_id: first id to be read in the folder
         """
-        patterns = np.zeros((self.w, self.h, self.k_w * self.k_h))
+        #patterns = np.zeros((self.w, self.h, self.k_w * self.k_h))
         is_h5 = False
         if len(data_path.split('.')) > 1 and data_path.split('.')[1] == 'h5':
             is_h5 = True
@@ -58,14 +58,17 @@ class EBSDmap:
                 pat_act_id -= first_id
             x_actu = pat_act_id % self.w
             y_actu = math.floor(pat_act_id / self.w)
-            patterns[x_actu, y_actu, :] = pat_act_gray.reshape(self.k_w * self.k_h)
+            #patterns[x_actu, y_actu, :] = pat_act_gray.reshape(self.k_w * self.k_h)
 
-        if self.is_h5:
-            h5_data.close()
-        return patterns, pat_names
+        #if self.is_h5:
+            #h5_data.close()
+        return h5_data, pat_names
 
     def set_lam(self, lam):
         self.lam = lam
 
     def set_sigmas(self, sigmas):
         self.sigmas = sigmas
+
+    def close(self):
+        self.pattern.close()
